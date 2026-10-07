@@ -29,7 +29,7 @@ Let $f(n)$ be the largest integer such that every set of $n$ points in the plane
 \[
   f(n)=(m_1+o(1))\,n,
 \]
-which is the first half of Conjecture~1 of D\'ucz and Varga. Combined with the bound $m_1\le 0.247$ of Ambrus, Csisz\'arik, Matolcsi, Varga and Zsámboki, this gives $f(n)\le(0.247+o(1))n$. The proof transfers an arbitrary (non-measurable) independent set to a measurable one, using the Haar rigidity theorem for wild character laws from the OpenAI preprint \emph{The Euclidean plane is not five-colorable} (2026); that theorem has a machine-checked Lean proof, which we have rebuilt.
+which is the first half of Conjecture~1 of D\'ucz and Varga. Combined with the bound $m_1\le 0.247$ of Ambrus, Csisz\'arik, Matolcsi, Varga and Zsámboki, this gives $f(n)\le(0.247+o(1))n$. The proof transfers an arbitrary (non-measurable) independent set to a measurable one, using the Haar rigidity theorem for wild character laws from the OpenAI preprint \emph{The Euclidean plane is not five-colorable} (2026); that theorem has a machine-checked Lean proof, and the whole argument is formalized in Lean on top of it.
 \end{abstract}
 
 \maketitle
@@ -69,7 +69,7 @@ By~\cite{ACMVZ}, $m_1\le 0.247$; by Croft~\cite{Croft}, $m_1\ge 0.22936$. Hence 
 Parts (1) and (2) are elementary (Sections~\ref{sec:conv} and~\ref{sec:LR}). Part (3) is the content of the paper (Section~\ref{sec:transfer}). Its only external input is Theorem~\ref{thm:rigidity} below, quoted from~\cite{OAI}.
 
 \begin{remark}[Status of the dependency]
-Theorem~\ref{thm:rigidity} is proved in the unrefereed preprint~\cite{OAI}. It is also proved in Lean 4 with Mathlib as the declaration \texttt{OAI.PlaneFiveColor.Spectral.wild\_fourier} in~\cite{OAIrepo}, in exactly the Fourier form used here. We rebuilt that development (Lean v4.34.1, Mathlib \texttt{d13f23b}); \texttt{\#print axioms} reports only \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}. A Lean formalization of the present argument on top of it is in progress at \url{https://github.com/daizisheng/erdos-1070}.
+Theorem~\ref{thm:rigidity} is proved in the unrefereed preprint~\cite{OAI}. It is also proved in Lean 4 with Mathlib as the declaration \texttt{OAI.PlaneFiveColor.Spectral.wild\_fourier} in~\cite{OAIrepo}, in exactly the Fourier form used here. We rebuilt that development (Lean v4.34.1, Mathlib \texttt{d13f23b}); \texttt{\#print axioms} reports only \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}. The whole argument of this paper is formalized in Lean on top of it (\url{https://github.com/daizisheng/erdos-1070}); the main theorems \texttt{Erdos1070.f\_div\_tendsto\_m1} and \texttt{Erdos1070.m1\_mul\_le\_f} also depend only on these three axioms. The Lean definition of upper density uses the squares $[-m,m]^2$.
 \end{remark}
 
 \section{Convergence of $f(n)/n$}\label{sec:conv}
