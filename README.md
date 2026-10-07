@@ -28,6 +28,8 @@ lake env lean Check.lean
 'Erdos1070.f_div_tendsto_m1' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Erdos1070.m1_mul_le_f' depends on axioms: [propext, Classical.choice, Quot.sound]
 'OAI.PlaneFiveColor.Spectral.wild_fourier' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos1070.f_div_tendsto_m1Ball' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Erdos1070.m1Ball_mul_le_f' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
 There is no `sorry` and there are no project axioms. Toolchain `leanprover/lean4:v4.34.1`, Mathlib `d13f23b`.
 
@@ -35,8 +37,12 @@ The main statements are:
 ```lean
 theorem f_div_tendsto_m1 : Tendsto (fun n : ℕ => (f n : ℝ) / n) atTop (𝓝 m1)
 theorem m1_mul_le_f (n : ℕ) : m1 * n ≤ f n
+-- erdosproblems.com convention: open discs B(0,R), R ∈ ℝ, R → ∞
+theorem f_div_tendsto_m1Ball : Tendsto (fun n : ℕ => (f n : ℝ) / n) atTop (𝓝 m1Ball)
+theorem m1Ball_mul_le_f (n : ℕ) : m1Ball * n ≤ f n
+theorem m1Ball_eq_m1 : m1Ball = m1
 ```
-The definitions are in `Erdos1070/Defs.lean`. Upper density is measured on the squares [−m, m]² (m ∈ ℕ). Erdős #232 uses discs; the paper argument works for both, but the Lean version currently uses squares only.
+The definitions are in `Erdos1070/Defs.lean` (`m1`: upper density on squares [−m, m]², m ∈ ℕ) and `Erdos1070/Disc.lean` (`m1Ball`: upper density on open discs of real radius, the convention of Erdős #232 on erdosproblems.com). The two give the same m₁.
 
 | file | content |
 |---|---|
@@ -48,3 +54,4 @@ The definitions are in `Erdos1070/Defs.lean`. Upper density is measured on the s
 | `TransferSample.lean` | one sample: a measurable field h : ℝ² → [0,1] with zero unit correlation and upper mean ≥ α* |
 | `TransferDensity.lean` | density points of {h > 0}: a measurable unit-distance-free set of upper density ≥ α* |
 | `Transfer.lean`, `Main.lean` | α* ≤ m₁; main theorem |
+| `DiscSample.lean`, `Disc.lean` | the same with discs of real radius; `m1Ball = m1` |
