@@ -254,4 +254,183 @@ theorem f_div_tendsto_alphaStar :
     have := f_le_of_ratio hP₀ hN0
     linarith
 
+/-! ### Larman–Rogers: `m₁ ≤ α*` -/
+
+section LR
+open scoped Classical
+
+lemma isClosed_square (m : ℝ) : IsClosed (square m) := by
+  have h1 : IsClosed {z : ℂ | |z.re| ≤ m} :=
+    isClosed_le (continuous_abs.comp Complex.continuous_re) continuous_const
+  have h2 : IsClosed {z : ℂ | |z.im| ≤ m} :=
+    isClosed_le (continuous_abs.comp Complex.continuous_im) continuous_const
+  exact h1.inter h2
+
+lemma measurableSet_square (m : ℝ) : MeasurableSet (square m) :=
+  (isClosed_square m).measurableSet
+
+lemma square_eq_preimage (m : ℝ) :
+    square m = Complex.measurableEquivRealProd ⁻¹' (Set.Icc (-m) m ×ˢ Set.Icc (-m) m) := by
+  ext z
+  simp [square, abs_le]; tauto
+
+lemma volume_square {m : ℝ} (hm : 0 ≤ m) :
+    volume (square m) = ENNReal.ofReal ((2 * m) ^ 2) := by
+  rw [square_eq_preimage, Complex.volume_preserving_equiv_real_prod.measure_preimage_equiv,
+    Measure.volume_eq_prod, Measure.prod_prod, Real.volume_Icc, ← ENNReal.ofReal_mul (by linarith)]
+  congr 1; ring
+
+lemma volume_square_toReal {m : ℝ} (hm : 0 ≤ m) :
+    (volume (square m)).toReal = (2 * m) ^ 2 := by
+  rw [volume_square hm, ENNReal.toReal_ofReal (by positivity)]
+
+lemma volume_square_ne_top (m : ℝ) : volume (square m) ≠ ⊤ := by
+  rcases le_or_gt 0 m with hm | hm
+  · rw [volume_square hm]; exact ENNReal.ofReal_ne_top
+  · have : square m = ∅ := by
+      ext z; simp only [square, Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_and]
+      intro h; exact absurd ((abs_nonneg _).trans h) (not_le.2 hm)
+    rw [this]; simp
+
+/-- Pointwise: the number of points of `P + x` in a unit-free `A` is at most `indepNum P`. -/
+lemma card_filter_translate_le {A : Set ℂ} (hu : UnitFree A) (P : Finset ℂ) (x : ℂ) :
+    (P.filter (fun p => p + x ∈ A)).card ≤ indepNum P := by
+  refine le_indepNum (Finset.filter_subset _ _) ?_
+  intro a ha b hb
+  simp only [Finset.coe_filter, Set.mem_ofPred_eq] at ha hb
+  have := hu _ ha.2 _ hb.2
+  simpa using this
+
+lemma sum_indicator_eq (A : Set ℂ) (P : Finset ℂ) (x : ℂ) :
+    ∑ p ∈ P, ((fun y => p + y) ⁻¹' A).indicator (1 : ℂ → ENNReal) x =
+      ((P.filter (fun p => p + x ∈ A)).card : ENNReal) := by
+  simp only [Set.indicator_apply, Set.mem_preimage, Pi.one_apply]
+  rw [Finset.sum_boole]
+
+/-- The integrated Larman–Rogers inequality (in `ℝ≥0∞`). -/
+lemma card_mul_volume_le {A : Set ℂ} (hA : MeasurableSet A) (hu : UnitFree A) (P : Finset ℂ)
+    {R : ℕ} (hR : ∀ p ∈ P, |p.re| ≤ R ∧ |p.im| ≤ R) (k : ℕ) :
+    (P.card : ENNReal) * volume (A ∩ square k) ≤
+      (indepNum P : ENNReal) * volume (square ((k : ℝ) + R)) := by
+  set M := square ((k : ℝ) + R)
+  have hmeas : ∀ p : ℂ, MeasurableSet ((fun y => p + y) ⁻¹' A) :=
+    fun p => hA.preimage (measurable_const_add p)
+  -- each translate term is at least `vol (A ∩ square k)`
+  have hterm : ∀ p ∈ P, volume (A ∩ square k) ≤ volume ((fun y => p + y) ⁻¹' A ∩ M) := by
+    intro p hp
+    rw [← measure_preimage_add (μ := volume) p (A ∩ square k)]
+    refine measure_mono ?_
+    intro x hx
+    simp only [Set.mem_preimage, Set.mem_inter_iff] at hx
+    refine ⟨hx.1, ?_⟩
+    obtain ⟨-, h1, h2⟩ := hx
+    obtain ⟨hr, hi⟩ := hR p hp
+    simp only [M, square, Set.mem_ofPred_eq, Complex.add_re, Complex.add_im] at h1 h2 ⊢
+    constructor
+    · calc |x.re| = |(p.re + x.re) - p.re| := by ring_nf
+        _ ≤ |p.re + x.re| + |p.re| := abs_sub _ _
+        _ ≤ k + R := by linarith
+    · calc |x.im| = |(p.im + x.im) - p.im| := by ring_nf
+        _ ≤ |p.im + x.im| + |p.im| := abs_sub _ _
+        _ ≤ k + R := by linarith
+  have hsum : ∑ p ∈ P, volume ((fun y => p + y) ⁻¹' A ∩ M) =
+      ∫⁻ x in M, ∑ p ∈ P, ((fun y => p + y) ⁻¹' A).indicator (1 : ℂ → ENNReal) x := by
+    rw [lintegral_finsetSum]
+    · refine Finset.sum_congr rfl (fun p _ => ?_)
+      rw [lintegral_indicator_one (hmeas p), Measure.restrict_apply (hmeas p)]
+    · intro p _
+      exact (measurable_one.indicator (hmeas p))
+  have hint : ∫⁻ x in M, ∑ p ∈ P, ((fun y => p + y) ⁻¹' A).indicator (1 : ℂ → ENNReal) x ≤
+      (indepNum P : ENNReal) * volume M := by
+    rw [← setLIntegral_const]
+    refine lintegral_mono (fun x => ?_)
+    rw [sum_indicator_eq]
+    exact Nat.cast_le.2 (by convert card_filter_translate_le hu P x)
+  calc (P.card : ENNReal) * volume (A ∩ square k)
+      = ∑ _p ∈ P, volume (A ∩ square k) := by simp
+    _ ≤ ∑ p ∈ P, volume ((fun y => p + y) ⁻¹' A ∩ M) := Finset.sum_le_sum hterm
+    _ ≤ _ := hsum ▸ hint
+
+/-- The density ratio along squares. -/
+noncomputable def densRatio (A : Set ℂ) (m : ℕ) : ℝ :=
+  (volume (A ∩ square m)).toReal / (volume (square m)).toReal
+
+lemma upperDensity_eq (A : Set ℂ) : upperDensity A = limsup (densRatio A) atTop := rfl
+
+lemma densRatio_nonneg (A : Set ℂ) (m : ℕ) : 0 ≤ densRatio A m := by
+  unfold densRatio; positivity
+
+lemma exists_bound (P : Finset ℂ) : ∃ R : ℕ, ∀ p ∈ P, |p.re| ≤ R ∧ |p.im| ≤ R := by
+  refine ⟨⌈∑ p ∈ P, ‖p‖⌉₊, fun p hp => ?_⟩
+  have h1 : ‖p‖ ≤ ∑ q ∈ P, ‖q‖ :=
+    Finset.single_le_sum (f := fun q : ℂ => ‖q‖) (fun _ _ => norm_nonneg _) hp
+  have h2 := Nat.le_ceil (∑ q ∈ P, ‖q‖)
+  exact ⟨(Complex.abs_re_le_norm p).trans (h1.trans h2),
+    (Complex.abs_im_le_norm p).trans (h1.trans h2)⟩
+
+/-- Real form: `|P| · d_k ≤ α(P) · ((k+R)/k)²` for `k ≥ 1`. -/
+lemma card_mul_densRatio_le {A : Set ℂ} (hA : MeasurableSet A) (hu : UnitFree A) (P : Finset ℂ)
+    {R : ℕ} (hR : ∀ p ∈ P, |p.re| ≤ R ∧ |p.im| ≤ R) {k : ℕ} (hk : 0 < k) :
+    (P.card : ℝ) * densRatio A k ≤ (indepNum P : ℝ) * (((k : ℝ) + R) / k) ^ 2 := by
+  have h := card_mul_volume_le hA hu P hR k
+  have hfin : (indepNum P : ENNReal) * volume (square ((k : ℝ) + R)) ≠ ⊤ :=
+    ENNReal.mul_ne_top (ENNReal.natCast_ne_top _) (volume_square_ne_top _)
+  have h' := ENNReal.toReal_mono hfin h
+  rw [ENNReal.toReal_mul, ENNReal.toReal_mul, ENNReal.toReal_natCast, ENNReal.toReal_natCast,
+    volume_square_toReal (by positivity)] at h'
+  have hkr : (0 : ℝ) < k := by exact_mod_cast hk
+  unfold densRatio
+  rw [volume_square_toReal (by positivity)]
+  rw [mul_div_assoc', div_le_iff₀ (by positivity)]
+  calc (P.card : ℝ) * (volume (A ∩ square k)).toReal ≤ indepNum P * (2 * ((k : ℝ) + R)) ^ 2 := h'
+    _ = _ := by field_simp
+
+lemma tendsto_ratio_sq (R : ℕ) :
+    Tendsto (fun k : ℕ => (((k : ℝ) + R) / k) ^ 2) atTop (𝓝 1) := by
+  have h1 : Tendsto (fun k : ℕ => (1 + (R : ℝ) / k) ^ 2) atTop (𝓝 ((1 + 0) ^ 2)) :=
+    ((tendsto_const_nhds.add (tendsto_const_div_atTop_nhds_zero_nat (R : ℝ))).pow 2)
+  simp only [add_zero, one_pow] at h1
+  refine h1.congr' ?_
+  filter_upwards [eventually_gt_atTop 0] with k hk
+  have hkr : (k : ℝ) ≠ 0 := by exact_mod_cast hk.ne'
+  congr 1; field_simp
+
+/-- **Larman–Rogers.** -/
+theorem upperDensity_mul_card_le (A : Set ℂ) (hA : MeasurableSet A) (hu : UnitFree A)
+    (P : Finset ℂ) : upperDensity A * P.card ≤ indepNum P := by
+  rcases P.eq_empty_or_nonempty with rfl | hP
+  · simp
+  have hn : (0 : ℝ) < P.card := by exact_mod_cast hP.card_pos
+  obtain ⟨R, hR⟩ := exists_bound P
+  set g : ℕ → ℝ := fun k => (indepNum P : ℝ) / P.card * (((k : ℝ) + R) / k) ^ 2
+  have hg : Tendsto g atTop (𝓝 ((indepNum P : ℝ) / P.card)) := by
+    have := (tendsto_ratio_sq R).const_mul ((indepNum P : ℝ) / P.card)
+    simpa [g] using this
+  have hle : ∀ᶠ k in atTop, densRatio A k ≤ g k := by
+    filter_upwards [eventually_gt_atTop 0] with k hk
+    have := card_mul_densRatio_le hA hu P hR hk
+    simp only [g]
+    rw [div_mul_eq_mul_div, le_div_iff₀ hn]
+    linarith
+  have hlim : upperDensity A ≤ (indepNum P : ℝ) / P.card := by
+    rw [upperDensity_eq, ← hg.limsup_eq]
+    exact limsup_le_limsup hle
+      (isCoboundedUnder_le_of_le atTop (densRatio_nonneg A)) hg.isBoundedUnder_le
+  rwa [le_div_iff₀ hn] at hlim
+
+lemma upperDensity_le_alphaStar {A : Set ℂ} (hA : MeasurableSet A) (hu : UnitFree A) :
+    upperDensity A ≤ alphaStar := by
+  refine le_csInf ratioSet_nonempty ?_
+  rintro r ⟨P, hP, rfl⟩
+  have hn : (0 : ℝ) < P.card := by exact_mod_cast hP.card_pos
+  rw [le_div_iff₀ hn]
+  exact upperDensity_mul_card_le A hA hu P
+
+theorem m1_le_alphaStar : m1 ≤ alphaStar := by
+  refine csSup_le ⟨_, ∅, MeasurableSet.empty, by simp [UnitFree], rfl⟩ ?_
+  rintro d ⟨A, hA, hu, rfl⟩
+  exact upperDensity_le_alphaStar hA hu
+
+end LR
+
 end Erdos1070
