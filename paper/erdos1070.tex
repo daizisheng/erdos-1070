@@ -1,0 +1,189 @@
+\documentclass[11pt]{amsart}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{hyperref}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\Hc}{\mathcal{H}_c}
+\newcommand{\Fc}{\mathcal{F}_c}
+
+\title[Unit-distance-free subsets of finite planar sets]{Every $n$ points in the plane contain $(m_1+o(1))\,n$ points with no unit distance}
+\author{Shisheng Li}
+\date{Draft, \today. Not for circulation before author audit.}
+
+\begin{document}
+\sloppy
+\begin{abstract}
+Let $f(n)$ be the largest integer such that every set of $n$ points in the plane contains $f(n)$ points no two at distance $1$ (Erd\H{o}s Problem \#1070). Let $m_1$ be the supremum of the upper densities of measurable planar sets with no two points at distance $1$. Larman and Rogers showed $f(n)\ge m_1 n$. We prove the matching asymptotic upper bound
+\[
+  f(n)=(m_1+o(1))\,n,
+\]
+which is the first half of Conjecture~1 of D\'ucz and Varga. Combined with the bound $m_1\le 0.247$ of Ambrus, Csisz\'arik, Matolcsi, Varga and Zsámboki, this gives $f(n)\le(0.247+o(1))n$. The proof transfers an arbitrary (non-measurable) independent set to a measurable one, using the Haar rigidity theorem for wild character laws from the OpenAI preprint \emph{The Euclidean plane is not five-colorable} (2026); that theorem has a machine-checked Lean proof, which we have rebuilt.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+For a finite set $P\subset\R^2$ let $G_P$ be its unit-distance graph and $\alpha(P)$ its independence number. Erd\H{o}s asked to estimate
+\[
+  f(n)=\min_{P\subset\R^2,\ |P|=n}\alpha(P),
+\]
+and in particular whether $f(n)\ge n/4$. The second question was answered negatively by D\'ucz and Varga~\cite{DV}, who constructed a finite unit-distance graph with independence ratio below $1/4$. For the first, the forum discussion of the problem proposed $f(n)=(m_1+o(1))n$ as a resolution, and D\'ucz and Varga state as their Conjecture~1 that $f(n)/n=m_1(\R^2)+o(1)$ and that $m_1(\R^2)=\delta_{\mathrm{Croft}}$. We prove the first half.
+
+\begin{definition}
+For measurable $A\subset\R^2$ let
+\[
+  \bar\delta(A)=\limsup_{m\to\infty}\frac{|A\cap Q_m|}{|Q_m|},
+\]
+where $Q_m$ is either the ball $B(0,m)$ or the square $[-m,m]^2$; every argument below works for both. Let $m_1$ be the supremum of $\bar\delta(A)$ over measurable $A$ containing no two points at distance $1$, and
+\[
+  \alpha^*=\inf\Big\{\frac{\alpha(P)}{|P|}:\ P\subset\R^2\text{ finite, nonempty}\Big\}.
+\]
+\end{definition}
+
+\begin{theorem}\label{thm:main}
+\begin{enumerate}
+\item $f(n)\ge\alpha^* n$ for every $n$, and $f(n)/n\to\alpha^*$.
+\item $\alpha^*\ge m_1$ \textup{(}Larman--Rogers~\cite{LR}\textup{)}.
+\item $m_1\ge\alpha^*$.
+\end{enumerate}
+Hence $m_1 n\le f(n)\le m_1 n+o(n)$.
+\end{theorem}
+
+\begin{corollary}
+By~\cite{ACMVZ}, $m_1\le 0.247$; by Croft~\cite{Croft}, $m_1\ge 0.22936$. Hence $0.22936\,n\le f(n)\le(0.247+o(1))\,n$.
+\end{corollary}
+
+Parts (1) and (2) are elementary (Sections~\ref{sec:conv} and~\ref{sec:LR}). Part (3) is the content of the paper (Section~\ref{sec:transfer}). Its only external input is Theorem~\ref{thm:rigidity} below, quoted from~\cite{OAI}.
+
+\begin{remark}[Status of the dependency]
+Theorem~\ref{thm:rigidity} is proved in the unrefereed preprint~\cite{OAI}. It is also proved in Lean 4 with Mathlib as the declaration \texttt{OAI.PlaneFiveColor.Spectral.wild\_fourier} in~\cite{OAIrepo}, in exactly the Fourier form used here. We rebuilt that development (Lean v4.34.1, Mathlib \texttt{d13f23b}); \texttt{\#print axioms} reports only \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}. A Lean formalization of the present argument on top of it is in progress at \url{https://github.com/daizisheng/erdos-1070}.
+\end{remark}
+
+\section{Convergence of $f(n)/n$}\label{sec:conv}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}(1)]
+If $|P|=n$ then $\alpha(P)\ge\alpha^*|P|$, so $f(n)\ge\alpha^*n$.
+
+Fix a finite $P_0$ with $|P_0|=s$, $\alpha(P_0)=a$. For $N\ge s$ write $N=ks+r$ with $0\le r<s$. Place $k$ translates of $P_0$ and $r$ further single points so that distinct pieces are more than $\operatorname{diam}(P_0)+2$ apart. The union $P$ has $N$ points and $G_P$ is the disjoint union of the pieces' graphs, so
+\[
+  f(N)\le\alpha(P)=ka+r\le\frac{N}{s}a+s .
+\]
+Thus $\limsup_N f(N)/N\le a/s$; taking the infimum over $P_0$ gives $\limsup f(N)/N\le\alpha^*$.
+\end{proof}
+
+\section{Larman--Rogers: $\alpha^*\ge m_1$}\label{sec:LR}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}(2)]
+Let $A$ be measurable and unit-distance-free with $\bar\delta(A)=\delta$, and let $P=\{p_1,\dots,p_n\}$, $\rho=\max_j|p_j|$. For every $x$, $(P+x)\cap A$ is independent in $G_{P+x}\cong G_P$. By Tonelli,
+\[
+  \int_{Q_m}|(P+x)\cap A|\,dx=\sum_j|A\cap(Q_m+p_j)|\ge\sum_j\big(|A\cap Q_m|-|Q_m\setminus(Q_m+p_j)|\big).
+\]
+For balls and squares, $|Q_m\setminus(Q_m+p)|\le 2\pi m|p|$, and $|Q_m|\ge\pi m^2$. Hence
+\[
+  \frac1{|Q_m|}\int_{Q_m}|(P+x)\cap A|\,dx\ \ge\ n\frac{|A\cap Q_m|}{|Q_m|}-\frac{2n\rho}{m}.
+\]
+Along a subsequence on which the density ratio tends to $\delta$, the right side exceeds $n\delta-\varepsilon$, so some $x$ has $\alpha(P)\ge|(P+x)\cap A|>n\delta-\varepsilon$. Hence $\alpha(P)\ge m_1|P|$.
+\end{proof}
+
+\section{The transfer: $m_1\ge\alpha^*$}\label{sec:transfer}
+
+\subsection{Setting and the cited theorem}
+
+Identify $\R^2$ with $\C$. Let $F=\overline{\Q}\cap\R$, $E=F(i)$ (the algebraic numbers) and $K=\{u\in E:u\bar u=1\}$, both regarded as discrete groups. Let $D=\widehat{E_{\rm disc}}$ be the compact dual of $E$, with $(ad)(z)=d(az)$ and $\psi_z(d)=d(z)$ for $a,z\in E$. The continuous characters form the Borel subgroup $C=j(\R^2)$, $j(\xi)(z)=e^{i\xi\cdot z}$. For $x,y\in E$, $|x-y|=1$ iff $x-y\in K$.
+
+\begin{theorem}[\cite{OAI}, Thm.~2.3; Lean: \texttt{wild\_fourier}]\label{thm:rigidity}
+If $\nu$ is a $K$-invariant probability measure on $D$ with $\nu(C)=0$, then $\int_D\psi_z\,d\nu=0$ for every $z\in E\setminus\{0\}$.
+\end{theorem}
+
+We also use the following standard lemma, whose proof in~\cite[Lemma~4.1]{OAI} we have checked line by line (spectral theorem for $E_{\rm disc}$, Bochner's theorem on $\R^2$, Fourier uniqueness on $D$).
+
+\begin{lemma}[\cite{OAI}, Lemma~4.1]\label{lem:cont}
+Let a standard probability space carry a measure-preserving action of $E$ with Koopman operators $T_z$. Then $\Hc=\{v\in L^2:\lim_{z\to0,\,z\in E}\|T_zv-v\|_2=0\}$ is $L^2$ of a factor $\Fc$ and is the range of the spectral projection on $C$. On $\Hc$ the $T_z$ extend to a strongly continuous unitary representation $T_x$, $x\in\R^2$, preserving the positive cone and the constant $1$. If rotations $V_u$ \textup{(}$u\in K$\textup{)} satisfy $V_uT_zV_u^{-1}=T_{uz}$, then $\Hc$ and its projection are rotation invariant.
+\end{lemma}
+
+\subsection{An invariant random independent set with density at least $\alpha^*$}
+
+Let $\Omega\subset\{0,1\}^E$ be the set of independent sets of the unit-distance graph on $E$. It is closed in the compact metrizable space $\{0,1\}^E$. Translations $s_z(\omega)=\omega-z$ and rotations $\rho_u(\omega)=u\omega$ are homeomorphisms of $\Omega$ with $s_w\rho_u=\rho_us_{u^{-1}w}$.
+
+\begin{lemma}\label{lem:inv}
+There is an $E\rtimes K$-invariant Borel probability $\mu$ on $\Omega$ with $\mu(0\in\omega)\ge\alpha^*$.
+\end{lemma}
+
+\begin{proof}
+One cannot simply average a single configuration over F{\o}lner sets of $E\rtimes K$: the visit counts are then non-uniform and one obtains a \emph{weighted} independence ratio, which may be smaller than $\alpha^*$. We average in two stages.
+
+\emph{Translations.} $E$ is countable abelian, so it has F{\o}lner sets $F_N$. Each $F_N$ is a finite planar set; pick a maximum independent $J_N\subset F_N$, so $|J_N|\ge\alpha^*|F_N|$. Let $\nu_N=|F_N|^{-1}\sum_{z\in F_N}\delta_{J_N-z}$. Then $\nu_N(0\in\omega)=|J_N|/|F_N|\ge\alpha^*$ and $\|(s_w)_*\nu_N-\nu_N\|_{TV}\le|F_N\triangle(F_N+w)|/|F_N|\to0$. A weak-$*$ limit point $\mu_0$ is $E$-invariant, and since $\{0\in\omega\}$ is clopen, $\mu_0(0\in\omega)\ge\alpha^*$.
+
+\emph{Rotations.} With F{\o}lner sets $G_M\subset K$, let $\mu_M=|G_M|^{-1}\sum_{u\in G_M}(\rho_u)_*\mu_0$. Each $(\rho_u)_*\mu_0$ is $E$-invariant because $(s_w)_*(\rho_u)_*=(\rho_u)_*(s_{u^{-1}w})_*$, and $\mu_M(0\in\omega)=\mu_0(0\in\omega)$ because $0\in u\omega\iff0\in\omega$. A weak-$*$ limit $\mu$ is $K$- and $E$-invariant with $\mu(0\in\omega)\ge\alpha^*$.
+\end{proof}
+
+\subsection{Projection to the continuous factor}
+
+On $L^2(\Omega,\mu)$ put $T_zF(\omega)=F(\omega-z)$ and $V_uF(\omega)=F(u^{-1}\omega)$; these are unitary, $V_uT_zV_u^{-1}=T_{uz}$, and $f=\mathbf 1[0\in\omega]$ satisfies $T_zf=\mathbf 1[z\in\omega]$, $V_uf=f$. Since $\omega$ is independent, $f\cdot T_uf=0$ for $u\in K$, so
+\begin{equation}\label{eq:prop}
+  \langle f,T_uf\rangle=0\qquad(u\in K).
+\end{equation}
+Let $p=\E(f\mid\Fc)$ and $b=f-p$. Then $0\le p\le1$, $\E p=\E f\ge\alpha^*$, and $V_up=p$, $V_ub=b$ (Lemma~\ref{lem:cont}).
+
+The spectral measure $\lambda_b$ of $b$ is $K$-invariant: $\langle b,T_{uz}b\rangle=\langle V_u^{-1}b,T_zV_u^{-1}b\rangle=\langle b,T_zb\rangle$, and Fourier coefficients determine finite measures on $D$. Since $b\perp\Hc$, $\lambda_b(C)=0$. By Theorem~\ref{thm:rigidity} (applied to $\lambda_b/\|b\|^2$ if $b\ne0$), $\langle b,T_zb\rangle=0$ for $z\ne0$. As $\Hc^\perp$ is $T$-invariant, $\langle p,T_ub\rangle=\langle b,T_up\rangle=0$. With~\eqref{eq:prop},
+\[
+  \int p\,T_up\,d\mu=0\qquad(u\in K).
+\]
+$K$ is dense in the unit circle (e.g.\ $((1-t^2)+2ti)/(1+t^2)$, $t\in\Q$) and $x\mapsto T_xp$ is continuous, so by unitarity
+\begin{equation}\label{eq:corr}
+  \int (T_xp)(T_{x+u}p)\,d\mu=0\qquad(x\in\R^2,\ |u|=1),
+\end{equation}
+with $0\le T_xp\le1$ and $\E[T_xp]=\E p$.
+
+\subsection{A measurable field and one good sample}
+
+Since $x\mapsto T_xp$ is continuous into the separable space $L^2(\mu)$, there is a jointly measurable $H:\R^2\times\Omega\to[0,1]$ with $H(x,\cdot)=T_xp$ for $x$ outside a null set. By Tonelli and~\eqref{eq:corr}, for every $m$,
+\[
+  \int_\Omega\int_{B(0,m)}\int_{S^1}H(x,\omega)H(x+u,\omega)\,d\sigma(u)\,dx\,d\mu(\omega)=0,
+\]
+so a conull set $\Omega_1$ of $\omega$ has all inner integrals zero. Let $A_m(\omega)=|Q_m|^{-1}\int_{Q_m}H(x,\omega)\,dx\in[0,1]$; then $\E A_m=\E p\ge\alpha^*$, and by the reverse Fatou lemma $X=\limsup_mA_m$ satisfies $\E X\ge\alpha^*$, hence $\mu(X\ge\alpha^*)>0$. Fix $\omega\in\Omega_1\cap\{X\ge\alpha^*\}$ and $h=H(\cdot,\omega)$:
+\begin{equation}\label{eq:sample}
+  \int_{B(0,m)}\int_{S^1}h(x)h(x+u)\,d\sigma\,dx=0\ \ \forall m,\qquad
+  \limsup_m\frac1{|Q_m|}\int_{Q_m}h\ge\alpha^*.
+\end{equation}
+
+\subsection{Density points}
+
+Let $A_0=\{h>0\}$. By~\eqref{eq:sample}, $\int_{B(0,m)}\int_{S^1}\mathbf 1_{A_0}(x)\mathbf 1_{A_0}(x+u)\,d\sigma\,dx=0$ for all $m$, and $\bar\delta(A_0)\ge\alpha^*$ since $h\le\mathbf 1_{A_0}$. Let $A$ be the set of Lebesgue density points of $A_0$; $A$ is Borel and $|A\triangle A_0|=0$, so $\bar\delta(A)\ge\alpha^*$.
+
+\begin{lemma}
+$A$ contains no two points at distance $1$.
+\end{lemma}
+
+\begin{proof}
+Suppose $x,\ y=x+u\in A$ with $|u|=1$. For small $h_0>0$ let $x'$ be uniform on $B(x,h_0)$ and, independently, $u'$ uniform on the arc $\{e^{i\theta}u:|\theta|<h_0/2\}$. Then $\P(x'\notin A_0)\to0$, and, since conditionally on $u'$ the point $x'+u'$ is uniform on $B(x+u',h_0)\subset B(y,2h_0)$, $\P(x'+u'\notin A_0)\le4|B(y,2h_0)\setminus A_0|/|B(y,2h_0)|\to0$. So $\P(x'\in A_0,\ x'+u'\in A_0)>0$. The law of $(x',u')$ has bounded density with respect to $dx\otimes\sigma$ on $B(0,m)\times S^1$ for $m>|x|+1$, contradicting~\eqref{eq:sample}.
+\end{proof}
+
+Hence $A$ is a measurable unit-distance-free set with $\bar\delta(A)\ge\alpha^*$, i.e.\ $m_1\ge\alpha^*$. This proves Theorem~\ref{thm:main}(3) and the theorem.
+
+\section*{Acknowledgements}
+The negative answer to the second question of \#1070 is due to D\'ucz and Varga~\cite{DV}. The rigidity theorem and the transfer template are from~\cite{OAI}; the present argument is a single-label version of its Proposition~4.2.
+
+\begin{thebibliography}{9}
+\bibitem{ACMVZ} G.~Ambrus, A.~Csisz\'arik, M.~Matolcsi, D.~Varga, P.~Zs\'amboki, \emph{The density of planar sets avoiding unit distances}, Math.\ Program.\ (2023); arXiv:2207.14179.
+\bibitem{Croft} H.~T.~Croft, \emph{Incidence incidents}, Eureka \textbf{30} (1967), 22--26.
+\bibitem{DV} \'A.~D\'ucz, D.~Varga, \emph{A unit-distance graph in the plane with independence ratio below $1/4$}, arXiv:2606.28157 (2026).
+\bibitem{LR} D.~G.~Larman, C.~A.~Rogers, \emph{The realization of distances within sets in Euclidean space}, Mathematika \textbf{19} (1972), 1--24.
+\bibitem{MRVZ} M.~Matolcsi, I.~Z.~Ruzsa, D.~Varga, P.~Zs\'amboki, \emph{The fractional chromatic number of the plane is at least 4}, arXiv:2311.10069.
+\bibitem{OAI} OpenAI, \emph{The Euclidean plane is not five-colorable}, preprint, 23 September 2026, \url{https://github.com/openai/math}.
+\bibitem{OAIrepo} OpenAI, \texttt{openai/math} Lean development, commit \texttt{adc7f12}, files \texttt{OAI/Analysis/PlaneSpectrum/*}.
+\end{thebibliography}
+\end{document}
