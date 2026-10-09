@@ -1,5 +1,7 @@
 # Erdős Problem #1070: f(n) = (m₁ + o(1)) n
 
+Authors: Shisheng Li and Yong Su
+
 Let f(n) be the largest integer such that every n points in the plane contain f(n) points with no two at distance 1. Let m₁ be the supremum of the upper densities of measurable planar sets with no two points at distance 1.
 
 **Theorem.** lim f(n)/n = m₁, and f(n) ≥ m₁ n for every n.
@@ -10,7 +12,7 @@ Let f(n) be the largest integer such that every n points in the plane contain f(
 - Dúcz–Varga answered the second question of #1070 (f(n) ≥ n/4?) negatively. The exact value of m₁ (Erdős #232) remains open.
 
 Contents:
-- `paper/erdos1070.tex`, `paper/erdos1070.pdf` — the paper (Shisheng Li and Yong Su).
+- `paper/erdos1070.tex`, `paper/erdos1070.pdf` — the paper.
 - `lean/` — a Lean 4 formalization of the theorem, with no `sorry`.
 
 The one external input is the Haar rigidity theorem for wild character laws (Thm 2.3 of OpenAI's preprint *The Euclidean plane is not five-colorable*, 2026-09-23). It is machine-checked in OpenAI's Lean development as `OAI.PlaneFiveColor.Spectral.wild_fourier`. `lean/OAI/` is a verbatim copy of the 70-file import closure of that development, taken from [openai/math](https://github.com/openai/math) at `adc7f12` (Apache-2.0, see `lean/OAI/LICENSE`).
