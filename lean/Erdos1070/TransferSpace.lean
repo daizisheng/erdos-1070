@@ -266,7 +266,7 @@ lemma lim0_add (φ ψ : C(Space,ℝ)) : lim0 (φ+ψ) = lim0 φ + lim0 ψ := by
   apply Tendsto.limUnder_eq
   convert (tendsto_lim0 φ).add (tendsto_lim0 ψ) using 1
   funext N
-  simp only [seqAvg, ContinuousMap.add_apply, Finset.sum_add_distrib, Pi.add_apply, mul_add]
+  simp only [seqAvg, ContinuousMap.add_apply, Finset.sum_add_distrib, mul_add]
 
 lemma lim0_smul (c : ℝ) (φ : C(Space,ℝ)) : lim0 (c • φ) = c * lim0 φ := by
   apply Tendsto.limUnder_eq
@@ -338,8 +338,8 @@ noncomputable def outer (φ : C(Space,ℝ)) : Rot →ᵇ ℝ :=
   BoundedContinuousFunction.ofNormedAddCommGroup
     (fun b => lim0 (φ.comp ⟨ro b, ro_continuous b⟩))
     continuous_of_discreteTopology ‖φ‖
-    (fun b => (Real.norm_eq_abs _).le.trans ((lim0_abs_le _).trans
-      (ContinuousMap.norm_le _ (norm_nonneg _) |>.mpr fun ω => φ.norm_coe_le_norm _)))
+    (fun _ => (Real.norm_eq_abs _).le.trans ((lim0_abs_le _).trans
+      (ContinuousMap.norm_le _ (norm_nonneg _) |>.mpr fun _ => φ.norm_coe_le_norm _)))
 
 open PlaneFiveColor.InvariantMean in
 /-- The full invariant functional. -/

@@ -10,7 +10,7 @@ Let f(n) be the largest integer such that every n points in the plane contain f(
 - Dúcz–Varga answered the second question of #1070 (f(n) ≥ n/4?) negatively. The exact value of m₁ (Erdős #232) remains open.
 
 Contents:
-- `paper/erdos1070.tex` — the paper. It is a draft and has not yet been audited.
+- `paper/erdos1070.tex`, `paper/erdos1070.pdf` — the paper (Shisheng Li and Yong Su).
 - `lean/` — a Lean 4 formalization of the theorem, with no `sorry`.
 
 The one external input is the Haar rigidity theorem for wild character laws (Thm 2.3 of OpenAI's preprint *The Euclidean plane is not five-colorable*, 2026-09-23). It is machine-checked in OpenAI's Lean development as `OAI.PlaneFiveColor.Spectral.wild_fourier`. `lean/OAI/` is a verbatim copy of the 70-file import closure of that development, taken from [openai/math](https://github.com/openai/math) at `adc7f12` (Apache-2.0, see `lean/OAI/LICENSE`).
@@ -19,7 +19,7 @@ The one external input is the Haar rigidity theorem for wild character laws (Thm
 
 ```
 cd lean
-lake exe cache get      # Mathlib build cache
+lake exe cache get      # Mathlib build cache (OAI/ and Erdos1070/ are compiled from source)
 lake build
 lake env lean Check.lean
 ```
@@ -31,7 +31,7 @@ lake env lean Check.lean
 'Erdos1070.f_div_tendsto_m1Ball' depends on axioms: [propext, Classical.choice, Quot.sound]
 'Erdos1070.m1Ball_mul_le_f' depends on axioms: [propext, Classical.choice, Quot.sound]
 ```
-There is no `sorry` and there are no project axioms. Toolchain `leanprover/lean4:v4.34.1`, Mathlib `d13f23b`.
+There is no `sorry` and there are no project axioms. To re-check every declaration of the import closure (Mathlib, `OAI/`, `Erdos1070/`) in the Lean kernel, run `lake env leanchecker Erdos1070` (single-threaded, about 40 minutes). Toolchain `leanprover/lean4:v4.34.1`, Mathlib `d13f23b`.
 
 The main statements are:
 ```lean

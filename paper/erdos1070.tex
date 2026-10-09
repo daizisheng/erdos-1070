@@ -25,7 +25,8 @@
 
 \title[Unit-distance-free subsets of finite planar sets]{Every $n$ points in the plane contain $(m_1+o(1))\,n$ points with no unit distance}
 \author{Shisheng Li}
-\date{Draft, \today.}
+\author{Yong Su}
+\date{October 10, 2026}
 
 \begin{document}
 \sloppy
@@ -73,7 +74,7 @@ For a measurable $A\subset\R^2$ and a family of regions $(W_r)_{r}$ put
 where $|\cdot|$ is Lebesgue measure. We consider four families: discs $B(0,r)$ or squares $[-r,r]^2$, with $r$ ranging over $\R_{>0}$ or over $\N_{\ge1}$; below $\N=\{1,2,\dots\}$. Let $m_1^W$ be the supremum of $\dens_W(A)$ over measurable unit-distance-free $A$. The database~\cite{EP} uses discs with real $r$.
 
 \begin{remark}\label{rem:conventions}
-All four values $m_1^W$ equal $\alpha^*$, so $m_1$ is unambiguous. Indeed, Proposition~\ref{prop:LR} below gives $m_1^W\le\alpha^*$ for each family, and Section~\ref{sec:transfer} constructs, for discs and for squares, a measurable unit-distance-free $A$ with $\limsup_{r\in\N}|A\cap W_r|/|W_r|\ge\alpha^*$; a limsup over $r\in\R$ is at least the limsup over $r\in\N$.
+All four values $m_1^W$ equal $\alpha^*$, so $m_1$ is unambiguous. Indeed, Proposition~\ref{prop:LR} below gives $m_1^W\le\alpha^*$ for each family, and Section~\ref{sec:transfer} constructs, for discs and for squares, a measurable unit-distance-free $A$ with $\limsup_{r\in\N}|A\cap W_r|/|W_r|\ge\alpha^*$; a limsup over $r\in\R$ is at least the limsup over $r\in\N$. The Lean formalization (Section~\ref{sec:lean}) covers two of the four conventions, squares with $r\in\N$ and discs with $r\in\R$; the other two are covered by the argument above.
 \end{remark}
 
 \section{Convergence of $f(n)/n$}\label{sec:conv}
@@ -151,7 +152,7 @@ Fix $\mu$ from Lemma~\ref{lem:inv}. Since $\Omega$ is compact metrizable, $(\Ome
   \langle f,T_uf\rangle=0\qquad(u\in K).
 \end{equation}
 
-Let $p=\E(f\mid\Fc)\in\Hc$ and $b=f-p\in\Hc^\perp$ (Lemma~\ref{lem:cont}). Then $0\le p\le1$ a.e., $\E p=\E f$, and $V_up=p$, $V_ub=b$. Both $p$ and $b$ are real-valued.
+Let $p=\E(f\mid\Fc)\in\Hc$ and $b=f-p\in\Hc^\perp$ (Lemma~\ref{lem:cont}). Then $0\le p\le1$ a.e., $\E p=\E f$, and $V_up=p$, $V_ub=b$. Both $p$ and $b$ are real-valued, since $f$ is.
 
 Let $\lambda_b$ be the spectral measure of $b$ on $D$: $\langle b,T_zb\rangle=\int_D\psi_z\,d\lambda_b$. By Lemma~\ref{lem:cont}(ii), $\lambda_b(C)=0$. For $u\in K$,
 \[
@@ -165,7 +166,7 @@ By Lemma~\ref{lem:cont}(iii), $(T_x)_{x\in\R^2}$ is a strongly continuous unitar
 \begin{equation}\label{eq:corr}
   \int(T_xp)(T_{x+u}p)\,d\mu=\langle T_xp,T_{x+u}p\rangle=\langle p,T_up\rangle=0 .
 \end{equation}
-Moreover $0\le T_xp\le1$ a.e.\ (apply positivity to $p$ and $\one-p$) and $\E[T_xp]=\langle T_xp,\one\rangle=\langle p,T_{-x}\one\rangle=\E p\ge\alpha^*$.
+Moreover $0\le T_xp\le1$ a.e.\ (apply positivity to $p$ and $\one-p$, using $T_x\one=\one$); in particular $T_xp$ is real-valued, and $\E[T_xp]=\langle T_xp,\one\rangle=\langle p,T_{-x}\one\rangle=\E p\ge\alpha^*$.
 
 \subsection{A measurable field and one sample}
 
@@ -209,7 +210,7 @@ The repository~\cite{repo} contains a Lean~4 project (toolchain v4.34.1, Mathlib
 \item \texttt{f n}, the minimum of \texttt{indepNum P} over $n$-element \texttt{P},
 \item \texttt{upperDensity} (squares $[-m,m]^2$, $m\in\N$) and \texttt{m1},
 \end{itemize}
-and prove \texttt{f\_div\_tendsto\_m1} ($f(n)/n\to m_1$) and \texttt{m1\_mul\_le\_f} ($m_1n\le f(n)$). The file \texttt{Disc.lean} defines \texttt{m1Ball} with open discs of real radius (the convention of~\cite{EP}) and proves \texttt{f\_div\_tendsto\_m1Ball}, \texttt{m1Ball\_mul\_le\_f} and \texttt{m1Ball\_eq\_m1}. \texttt{\#print axioms} reports only \texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound} for all of these and for \texttt{wild\_fourier}. The Lean proof follows Sections~\ref{sec:conv}--\ref{sec:transfer}; the Følner sets in $E$ are constructed explicitly as above, and the weak-$*$ limits are realized by ultrafilter limits of positive functionals and the Riesz--Markov theorem.
+and prove \texttt{f\_div\_tendsto\_m1} ($f(n)/n\to m_1$) and \texttt{m1\_mul\_le\_f} ($m_1n\le f(n)$). The file \texttt{Disc.lean} defines \texttt{m1Ball} with open discs of real radius (the convention of~\cite{EP}) and proves \texttt{f\_div\_tendsto\_m1Ball}, \texttt{m1Ball\_mul\_le\_f} and \texttt{m1Ball\_eq\_m1}. Corollary~\ref{cor:num} is not formalized: its numerical bounds are quoted from~\cite{Croft,ACMVZ}. \texttt{\#print axioms} reports only \texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound} for all of these and for \texttt{wild\_fourier}. The files in \texttt{OAI/} are compiled from source, not taken from a cache, and \texttt{lake env leanchecker Erdos1070} re-checks the whole import closure (Mathlib, \texttt{OAI/} and our files) in the Lean kernel. The Lean proof follows Sections~\ref{sec:conv}--\ref{sec:transfer}; the Følner sets in $E$ are constructed explicitly as above, and the weak-$*$ limits are realized by ultrafilter limits of positive functionals and the Riesz--Markov theorem.
 
 \section*{Acknowledgements}
 The negative answer to the second question of Erd\H{o}s is due to D\'ucz and Varga~\cite{DV}. Theorem~\ref{thm:rigidity} and the transfer template are from~\cite{OAI}. AI tools were used in this work: the observation that~\cite[Section~4]{OAI} applies to a single colour class, the write-up and the Lean formalization were produced with Claude (Anthropic), and the manuscript was audited with GPT (OpenAI).
@@ -226,6 +227,6 @@ The negative answer to the second question of Erd\H{o}s is due to D\'ucz and Var
 \bibitem{MRVZ} M.~Matolcsi, I.~Z.~Ruzsa, D.~Varga, P.~Zs\'amboki, \emph{The fractional chromatic number of the plane is at least 4}, arXiv:2311.10069.
 \bibitem{OAI} OpenAI, \emph{The Euclidean plane is not five-colorable}, preprint, 23 September 2026, \url{https://github.com/openai/math/tree/adc7f1241b42e322a6451854ab7e4b4c146bf78a/preprints/The-Euclidean-plane-is-not-five-colorable-September-23-2026}.
 \bibitem{OAIrepo} OpenAI, \texttt{openai/math}, Lean development, \url{https://github.com/openai/math/tree/adc7f1241b42e322a6451854ab7e4b4c146bf78a/lean/OAI/Analysis/PlaneSpectrum}.
-\bibitem{repo} S.~Li, \url{https://github.com/daizisheng/erdos-1070}, release \texttt{v1.0}.
+\bibitem{repo} S.~Li, Y.~Su, \url{https://github.com/daizisheng/erdos-1070}, release \texttt{v1.0}.
 \end{thebibliography}
 \end{document}
